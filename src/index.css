@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #fefbf2;
+  --color-foreground: #4a4a4a;
+
+  --color-primary: #485733;
+  --color-primary-foreground: #ffffff;
+
+  --color-secondary: #e9b643;
+  --color-secondary-foreground: #ffffff;
+
+  --font-vazir: "Vazirmatn", system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-vazir);
+  }
+
+  body {
+    background: var(--color-background);
+    color: var(--color-foreground);
+  }
+
+  :focus-visible {
+    outline: none;
+  }
+}
