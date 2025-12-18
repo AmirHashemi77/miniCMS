@@ -18,7 +18,7 @@ export default function HtmlPreview(props: Props) {
             dangerouslySetInnerHTML={{ __html: props.html }}
           />
         </div>
-        <pre className="p-4 text-xs leading-6 text-foreground/80">{props.html}</pre>
+        {/* <pre className="p-4 text-xs leading-6 text-foreground/80">{props.html}</pre> */}
       </div>
     </div>
   );

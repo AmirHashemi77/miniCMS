@@ -1,8 +1,10 @@
 import { useMemo, useState } from "react";
 import type { Descendant } from "slate";
+import { Node } from "slate";
 import HtmlPreview from "../editor/HtmlPreview";
 import RichTextEditor from "../editor/RichTextEditor";
 import { slateToHtml } from "../../lib/slateHtml";
+import type { ArticleStatus } from "../../types/article";
 
 type Props = {
   initialTitle: string;
@@ -13,10 +15,10 @@ type Props = {
     title: string;
     summary: string;
     image: string | null;
+    status: ArticleStatus;
     value: Descendant[];
     html: string;
   }) => void;
-  saveLabel: string;
 };
 
 export default function ArticleEditorForm(props: Props) {
@@ -27,6 +29,12 @@ export default function ArticleEditorForm(props: Props) {
   const [error, setError] = useState<string | null>(null);
 
   const html = useMemo(() => slateToHtml(value), [value]);
+  const isContentEmpty = useMemo(() => {
+    const plain = value.map((n) => Node.string(n)).join("").trim();
+    return plain.length === 0;
+  }, [value]);
+  const isTitleEmpty = title.trim().length === 0;
+  const canPublish = !isTitleEmpty && !isContentEmpty;
 
   return (
     <div className="grid gap-4">
@@ -85,21 +93,43 @@ export default function ArticleEditorForm(props: Props) {
             {error ? <div className="mt-3 text-sm text-red-700">{error}</div> : null}
           </div>
 
-          <button
-            type="button"
-            onClick={() => {
-              const nextTitle = title.trim();
-              if (!nextTitle) {
-                setError("عنوان مقاله را وارد کنید.");
-                return;
-              }
-              setError(null);
-              props.onSave({ title: nextTitle, summary, image, value, html });
-            }}
-            className="inline-flex cursor-pointer items-center justify-center rounded-xl bg-primary px-4 py-2 text-sm text-primary-foreground"
-          >
-            {props.saveLabel}
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                const nextTitle = title.trim();
+                if (!nextTitle) {
+                  setError("عنوان مقاله را وارد کنید.");
+                  return;
+                }
+                setError(null);
+                props.onSave({ title: nextTitle, summary, image, status: "draft", value, html });
+              }}
+              className="inline-flex cursor-pointer items-center justify-center rounded-xl border border-black/10 bg-white px-4 py-2 text-sm hover:bg-black/5"
+            >
+              ذخیره پیش‌نویس
+            </button>
+            <button
+              type="button"
+              disabled={!canPublish}
+              onClick={() => {
+                const nextTitle = title.trim();
+                if (!nextTitle) {
+                  setError("عنوان مقاله را وارد کنید.");
+                  return;
+                }
+                if (isContentEmpty) {
+                  setError("برای انتشار، متن مقاله نباید خالی باشد.");
+                  return;
+                }
+                setError(null);
+                props.onSave({ title: nextTitle, summary, image, status: "published", value, html });
+              }}
+              className="inline-flex cursor-pointer items-center justify-center rounded-xl bg-primary px-4 py-2 text-sm text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              انتشار
+            </button>
+          </div>
         </div>
       </div>
 

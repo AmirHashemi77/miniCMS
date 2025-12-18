@@ -80,9 +80,8 @@ export default function EditArticle() {
         initialSummary={article.summary}
         initialImage={article.image}
         initialValue={article.value}
-        saveLabel="ذخیره تغییرات"
-        onSave={({ title, summary, image, value, html }) => {
-          updateArticle(article.id, { title, summary, image, value, html });
+        onSave={({ title, summary, image, status, value, html }) => {
+          updateArticle(article.id, { title, summary, image, status, value, html });
           forceRender((t) => t + 1);
         }}
       />

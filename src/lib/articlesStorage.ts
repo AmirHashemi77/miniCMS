@@ -2,6 +2,7 @@ import type { Descendant } from "slate";
 import type { Article } from "../types/article";
 import type { ParagraphElement } from "../slate";
 import type { Align } from "../slate";
+import type { ArticleStatus } from "../types/article";
 
 const STORAGE_KEY = "mini-cms:articles:v1";
 
@@ -40,11 +41,14 @@ export function listArticles(): Article[] {
     .filter((a) => a && typeof a.id === "string")
     .map((a) => {
       const anyA = a as Partial<Article> & Record<string, unknown>;
+      const status: ArticleStatus =
+        anyA.status === "published" || anyA.status === "draft" ? anyA.status : "draft";
       return {
         id: String(anyA.id),
         title: typeof anyA.title === "string" ? anyA.title : "",
         summary: typeof anyA.summary === "string" ? anyA.summary : "",
         image: typeof anyA.image === "string" ? anyA.image : null,
+        status,
         value: Array.isArray(anyA.value) ? (anyA.value as Descendant[]) : DEFAULT_SLATE_VALUE,
         html: typeof anyA.html === "string" ? anyA.html : "",
         createdAt: typeof anyA.createdAt === "string" ? anyA.createdAt : nowIso(),
@@ -64,6 +68,7 @@ export function createArticle(input: {
   title: string;
   summary: string;
   image: string | null;
+  status: ArticleStatus;
   value: Descendant[];
   html: string;
 }): Article {
@@ -73,6 +78,7 @@ export function createArticle(input: {
     title: input.title.trim(),
     summary: input.summary.trim(),
     image: input.image,
+    status: input.status,
     value: input.value,
     html: input.html,
     createdAt,
@@ -86,7 +92,7 @@ export function createArticle(input: {
 
 export function updateArticle(
   id: string,
-  patch: Partial<Pick<Article, "title" | "summary" | "image" | "value" | "html">>,
+  patch: Partial<Pick<Article, "title" | "summary" | "image" | "status" | "value" | "html">>,
 ): Article | null {
   const articles = listArticles();
   const index = articles.findIndex((a) => a.id === id);
@@ -99,6 +105,8 @@ export function updateArticle(
     title: typeof patch.title === "string" ? patch.title.trim() : current.title,
     summary: typeof patch.summary === "string" ? patch.summary.trim() : current.summary,
     image: patch.image === null || typeof patch.image === "string" ? patch.image : current.image,
+    status:
+      patch.status === "published" || patch.status === "draft" ? patch.status : current.status,
     updatedAt: nowIso(),
   };
 

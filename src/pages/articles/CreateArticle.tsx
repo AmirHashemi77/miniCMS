@@ -17,9 +17,8 @@ export default function CreateArticle() {
         initialSummary=""
         initialImage={null}
         initialValue={DEFAULT_SLATE_VALUE}
-        saveLabel="ذخیره"
-        onSave={({ title, summary, image, value, html }) => {
-          const article = createArticle({ title, summary, image, value, html });
+        onSave={({ title, summary, image, status, value, html }) => {
+          const article = createArticle({ title, summary, image, status, value, html });
           navigate(`/articles/${article.id}/edit`, { replace: true });
         }}
       />
