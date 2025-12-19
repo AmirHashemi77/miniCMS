@@ -17,6 +17,9 @@ function AdminLayout() {
             <NavLink to="/articles" className={({ isActive }) => ["rounded-xl px-3 py-2 transition", isActive ? "bg-primary text-primary-foreground" : "hover:bg-black/5"].join(" ")}>
               مقالات
             </NavLink>
+            <NavLink to="/tags" className={({ isActive }) => ["rounded-xl px-3 py-2 transition", isActive ? "bg-primary text-primary-foreground" : "hover:bg-black/5"].join(" ")}>
+              تگ‌ها
+            </NavLink>
             <NavLink to="/articles/new" className={({ isActive }) => ["rounded-xl px-3 py-2 transition", isActive ? "bg-secondary text-secondary-foreground" : "hover:bg-black/5"].join(" ")}>
               ایجاد مقاله
             </NavLink>

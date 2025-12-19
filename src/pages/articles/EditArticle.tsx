@@ -79,9 +79,10 @@ export default function EditArticle() {
         initialTitle={article.title}
         initialSummary={article.summary}
         initialImage={article.image}
+        initialTagIds={article.tags ?? []}
         initialValue={article.value}
-        onSave={({ title, summary, image, status, value, html }) => {
-          updateArticle(article.id, { title, summary, image, status, value, html });
+        onSave={({ title, summary, image, status, tags, value, html }) => {
+          updateArticle(article.id, { title, summary, image, status, tags, value, html });
           forceRender((t) => t + 1);
         }}
       />

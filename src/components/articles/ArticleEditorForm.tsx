@@ -5,17 +5,20 @@ import HtmlPreview from "../editor/HtmlPreview";
 import RichTextEditor from "../editor/RichTextEditor";
 import { slateToHtml } from "../../lib/slateHtml";
 import type { ArticleStatus } from "../../types/article";
+import TagSelector from "../tags/TagSelector";
 
 type Props = {
   initialTitle: string;
   initialSummary: string;
   initialImage: string | null;
+  initialTagIds: string[];
   initialValue: Descendant[];
   onSave: (data: {
     title: string;
     summary: string;
     image: string | null;
     status: ArticleStatus;
+    tags: string[];
     value: Descendant[];
     html: string;
   }) => void;
@@ -25,6 +28,7 @@ export default function ArticleEditorForm(props: Props) {
   const [title, setTitle] = useState(props.initialTitle);
   const [summary, setSummary] = useState(props.initialSummary);
   const [image, setImage] = useState<string | null>(props.initialImage);
+  const [tags, setTags] = useState<string[]>(props.initialTagIds);
   const [value, setValue] = useState<Descendant[]>(props.initialValue);
   const [error, setError] = useState<string | null>(null);
 
@@ -102,13 +106,13 @@ export default function ArticleEditorForm(props: Props) {
                   setError("عنوان مقاله را وارد کنید.");
                   return;
                 }
-                setError(null);
-                props.onSave({ title: nextTitle, summary, image, status: "draft", value, html });
-              }}
-              className="inline-flex cursor-pointer items-center justify-center rounded-xl border border-black/10 bg-white px-4 py-2 text-sm hover:bg-black/5"
-            >
-              ذخیره پیش‌نویس
-            </button>
+              setError(null);
+              props.onSave({ title: nextTitle, summary, image, status: "draft", tags, value, html });
+            }}
+            className="inline-flex cursor-pointer items-center justify-center rounded-xl border border-black/10 bg-white px-4 py-2 text-sm hover:bg-black/5"
+          >
+            ذخیره پیش‌نویس
+          </button>
             <button
               type="button"
               disabled={!canPublish}
@@ -123,7 +127,7 @@ export default function ArticleEditorForm(props: Props) {
                   return;
                 }
                 setError(null);
-                props.onSave({ title: nextTitle, summary, image, status: "published", value, html });
+                props.onSave({ title: nextTitle, summary, image, status: "published", tags, value, html });
               }}
               className="inline-flex cursor-pointer items-center justify-center rounded-xl bg-primary px-4 py-2 text-sm text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
             >
@@ -132,6 +136,8 @@ export default function ArticleEditorForm(props: Props) {
           </div>
         </div>
       </div>
+
+      <TagSelector selectedIds={tags} onChange={setTags} />
 
       <div className="grid gap-4">
         <div>

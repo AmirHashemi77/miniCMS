@@ -49,7 +49,8 @@ export default function ArticlesList() {
         <div className="overflow-hidden rounded-2xl border border-black/5 bg-white/60">
           <div className="grid grid-cols-12 gap-3 border-b border-black/5 px-4 py-3 text-xs text-foreground/70">
             <div className="col-span-2 hidden sm:block">تصویر</div>
-            <div className="col-span-8 sm:col-span-6">عنوان / خلاصه</div>
+            <div className="col-span-6 sm:col-span-4">عنوان / خلاصه</div>
+            <div className="col-span-2">وضعیت</div>
             <div className="col-span-2">تاریخ</div>
             <div className="col-span-2 text-left">عملیات</div>
           </div>
@@ -65,29 +66,28 @@ export default function ArticlesList() {
                   )}
                 </div>
 
-	                <div className="col-span-8 sm:col-span-6 min-w-0">
-	                  <div className="flex items-center gap-2">
-	                    <div className="min-w-0 flex-1 truncate text-sm font-medium">{row.title}</div>
-	                    <span
-	                      className={[
-	                        "shrink-0 rounded-full px-2 py-1 text-[10px] font-semibold",
-	                        row.status === "published"
-	                          ? "bg-green-100 text-green-800"
-	                          : "bg-black/5 text-foreground/70",
-	                      ].join(" ")}
-	                    >
-	                      {row.status === "published" ? "منتشر شده" : "پیش‌نویس"}
-	                    </span>
-	                  </div>
-	                  {row.summary ? <div className="mt-0.5 truncate text-xs text-foreground/70">{row.summary}</div> : null}
-	                </div>
+                <div className="col-span-6 sm:col-span-4 min-w-0">
+                  <div className="truncate text-sm font-medium">{row.title}</div>
+                  {row.summary ? <div className="mt-0.5 truncate text-xs text-foreground/70">{row.summary}</div> : null}
+                </div>
+
+                <div className="col-span-2">
+                  <span
+                    className={[
+                      "inline-flex rounded-full px-2 py-1 text-[10px] font-semibold",
+                      row.status === "published" ? "bg-green-100 text-green-800" : "bg-black/5 text-foreground/70",
+                    ].join(" ")}
+                  >
+                    {row.status === "published" ? "منتشر شده" : "پیش‌نویس"}
+                  </span>
+                </div>
 
                 <div className="col-span-2 text-xs text-foreground/70">{row.createdAt}</div>
 
-	                <div className="col-span-2 flex justify-start gap-2">
-	                  <Link to={`/articles/${row.id}/edit`} className="inline-flex items-center justify-center rounded-xl border border-black/10 bg-white px-3 py-2 text-xs hover:bg-black/5">
-	                    ویرایش
-	                  </Link>
+                <div className="col-span-2 flex justify-start gap-2">
+                  <Link to={`/articles/${row.id}/edit`} className="inline-flex items-center justify-center rounded-xl border border-black/10 bg-white px-3 py-2 text-xs hover:bg-black/5">
+                    ویرایش
+                  </Link>
 	                  {row.status === "draft" ? (
 	                    <button
 	                      type="button"

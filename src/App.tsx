@@ -5,6 +5,7 @@ import ArticlesList from "./pages/articles/ArticlesList";
 import CreateArticle from "./pages/articles/CreateArticle";
 import EditArticle from "./pages/articles/EditArticle";
 import NotFound from "./pages/NotFound";
+import TagsList from "./pages/tags/TagsList";
 
 const App: FC = () => {
   return (
@@ -18,6 +19,7 @@ const App: FC = () => {
             <Route path="new" element={<CreateArticle />} />
             <Route path=":id/edit" element={<EditArticle />} />
           </Route>
+          <Route path="tags" element={<TagsList />} />
 
           <Route path="*" element={<NotFound />} />
         </Route>

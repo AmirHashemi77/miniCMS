@@ -16,9 +16,10 @@ export default function CreateArticle() {
         initialTitle=""
         initialSummary=""
         initialImage={null}
+        initialTagIds={[]}
         initialValue={DEFAULT_SLATE_VALUE}
-        onSave={({ title, summary, image, status, value, html }) => {
-          const article = createArticle({ title, summary, image, status, value, html });
+        onSave={({ title, summary, image, status, tags, value, html }) => {
+          const article = createArticle({ title, summary, image, status, tags, value, html });
           navigate(`/articles/${article.id}/edit`, { replace: true });
         }}
       />
