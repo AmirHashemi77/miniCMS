@@ -66,12 +66,11 @@ export function deleteTag(tagId: string) {
   const articles = listArticles();
   const nextArticles = articles.map((a) => ({
     ...a,
-    tags: (a.tags ?? []).filter((id) => id !== tagId),
+    tagIds: (a.tagIds ?? []).filter((id: string) => id !== tagId),
   }));
   replaceAllArticles(nextArticles);
 }
 
 export function countTagUsage(tagId: string) {
-  return listArticles().filter((a) => (a.tags ?? []).includes(tagId)).length;
+  return listArticles().filter((a) => (a.tagIds ?? []).includes(tagId)).length;
 }
-

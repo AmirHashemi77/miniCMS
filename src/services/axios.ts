@@ -1,8 +1,9 @@
 import axios from "axios";
 import { enqueueSnackbar } from "notistack";
+import { logOut } from "../lib/auth";
 
 const API = axios.create({
-  baseURL: import.meta.env.API_BASE_URL, // یا process.env.REACT_APP_API_URL
+  baseURL: "http://localhost:3001/api", // یا process.env.REACT_APP_API_URL
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
@@ -26,7 +27,16 @@ API.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      enqueueSnackbar("خطای احراز هویت", { variant: "error" });
+      const requestUrl: string = error.config?.url ?? "";
+      const isLoginRequest = requestUrl.includes("/admin/login");
+
+      if (!isLoginRequest) {
+        enqueueSnackbar("خطای احراز هویت", { variant: "error" });
+        logOut();
+        if (typeof window !== "undefined" && window.location.pathname !== "/login") {
+          window.location.assign("/login");
+        }
+      }
     }
     return Promise.reject(error);
   }

@@ -1,6 +1,8 @@
 import type { FC } from "react";
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom";
+import RequireAuth from "./components/RequireAuth";
 import AdminLayout from "./layouts/AdminLayout";
+import Login from "./pages/Login";
 import ArticlesList from "./pages/articles/ArticlesList";
 import CreateArticle from "./pages/articles/CreateArticle";
 import EditArticle from "./pages/articles/EditArticle";
@@ -11,17 +13,21 @@ const App: FC = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<AdminLayout />}>
-          <Route index element={<Navigate to="/articles" replace />} />
+        <Route path="/login" element={<Login />} />
 
-          <Route path="articles" element={<Outlet />}>
-            <Route index element={<ArticlesList />} />
-            <Route path="new" element={<CreateArticle />} />
-            <Route path=":id/edit" element={<EditArticle />} />
+        <Route element={<RequireAuth />}>
+          <Route path="/" element={<AdminLayout />}>
+            <Route index element={<Navigate to="/articles" replace />} />
+
+            <Route path="articles" element={<Outlet />}>
+              <Route index element={<ArticlesList />} />
+              <Route path="new" element={<CreateArticle />} />
+              <Route path=":id/edit" element={<EditArticle />} />
+            </Route>
+            <Route path="tags" element={<TagsList />} />
+
+            <Route path="*" element={<NotFound />} />
           </Route>
-          <Route path="tags" element={<TagsList />} />
-
-          <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -49,7 +49,7 @@ export function listArticles(): Article[] {
         summary: typeof anyA.summary === "string" ? anyA.summary : "",
         image: typeof anyA.image === "string" ? anyA.image : null,
         status,
-        tags: Array.isArray(anyA.tags) ? anyA.tags.filter((t) => typeof t === "string") : [],
+        tagIds: Array.isArray(anyA.tagIds) ? anyA.tagIds.filter((t) => typeof t === "string") : [],
         value: Array.isArray(anyA.value) ? (anyA.value as Descendant[]) : DEFAULT_SLATE_VALUE,
         html: typeof anyA.html === "string" ? anyA.html : "",
         createdAt: typeof anyA.createdAt === "string" ? anyA.createdAt : nowIso(),
@@ -70,7 +70,7 @@ export function createArticle(input: {
   summary: string;
   image: string | null;
   status: ArticleStatus;
-  tags: string[];
+  tagIds: string[];
   value: Descendant[];
   html: string;
 }): Article {
@@ -81,7 +81,7 @@ export function createArticle(input: {
     summary: input.summary.trim(),
     image: input.image,
     status: input.status,
-    tags: input.tags,
+    tagIds: input.tagIds,
     value: input.value,
     html: input.html,
     createdAt,
@@ -95,7 +95,7 @@ export function createArticle(input: {
 
 export function updateArticle(
   id: string,
-  patch: Partial<Pick<Article, "title" | "summary" | "image" | "status" | "tags" | "value" | "html">>,
+  patch: Partial<Pick<Article, "title" | "summary" | "image" | "status" | "tagIds" | "value" | "html">>,
 ): Article | null {
   const articles = listArticles();
   const index = articles.findIndex((a) => a.id === id);
@@ -110,7 +110,7 @@ export function updateArticle(
     image: patch.image === null || typeof patch.image === "string" ? patch.image : current.image,
     status:
       patch.status === "published" || patch.status === "draft" ? patch.status : current.status,
-    tags: Array.isArray(patch.tags) ? patch.tags.filter((t) => typeof t === "string") : current.tags,
+    tagIds: Array.isArray(patch.tagIds) ? patch.tagIds.filter((t) => typeof t === "string") : current.tagIds,
     updatedAt: nowIso(),
   };
 

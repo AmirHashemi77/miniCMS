@@ -1,8 +1,9 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { useSnackbar } from "notistack";
 import { Node } from "slate";
-import { deleteArticle, listArticles, updateArticle } from "../../lib/articlesStorage";
 import { formatFaDate } from "../../lib/dates";
+import { changeStatusAticleService, deleteAticlesService, getAticlesListService } from "../../services/article.services";
 import type { Article } from "../../types/article";
 
 function EmptyState() {
@@ -15,7 +16,37 @@ function EmptyState() {
 }
 
 export default function ArticlesList() {
-  const [articles, setArticles] = useState<Article[]>(() => listArticles());
+  const { enqueueSnackbar } = useSnackbar();
+
+  const [page, setPage] = useState(1);
+  const [limit] = useState(20);
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isMutatingId, setIsMutatingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isStale = false;
+
+    const run = async () => {
+      setIsLoading(true);
+      try {
+        const response = await getAticlesListService(page, limit);
+        const data = response.data as unknown;
+        const next = Array.isArray(data) ? (data as Article[]) : (((data as any)?.items ?? (data as any)?.data ?? []) as Article[]);
+        if (!isStale) setArticles(next);
+      } catch {
+        enqueueSnackbar("خطا در دریافت لیست مقالات", { variant: "error" });
+        if (!isStale) setArticles([]);
+      } finally {
+        if (!isStale) setIsLoading(false);
+      }
+    };
+
+    void run();
+    return () => {
+      isStale = true;
+    };
+  }, [enqueueSnackbar, limit, page]);
 
   const rows = useMemo(() => {
     return articles.map((a) => ({
@@ -24,12 +55,58 @@ export default function ArticlesList() {
       summary: a.summary,
       image: a.image,
       status: a.status,
-      canPublish:
-        a.title.trim().length > 0 &&
-        Node.string({ children: a.value } as unknown as Node).trim().length > 0,
+      canPublish: (() => {
+        if (!a.title || a.title.trim().length === 0) return false;
+        try {
+          const value = (a as any).value;
+          if (!Array.isArray(value)) return false;
+          return Node.string({ children: value } as unknown as Node).trim().length > 0;
+        } catch {
+          return false;
+        }
+      })(),
       createdAt: formatFaDate(a.createdAt),
     }));
   }, [articles]);
+
+  const onChangeStatus = async (id: string, nextStatus: "draft" | "published") => {
+    const current = articles.find((a) => a.id === id);
+    if (!current) return;
+
+    setIsMutatingId(id);
+    try {
+      const response = await changeStatusAticleService(id);
+      const updated = (response.data as unknown) as Article | null;
+      setArticles((prev) =>
+        prev.map((a) => {
+          if (a.id !== id) return a;
+          if (updated && updated.id) return updated;
+          return { ...a, status: nextStatus };
+        })
+      );
+      enqueueSnackbar(nextStatus === "published" ? "مقاله منتشر شد" : "مقاله از انتشار خارج شد", { variant: "success" });
+    } catch {
+      enqueueSnackbar("خطا در تغییر وضعیت مقاله", { variant: "error" });
+    } finally {
+      setIsMutatingId(null);
+    }
+  };
+
+  const onDelete = async (id: string) => {
+    const ok = window.confirm("این مقاله حذف شود؟");
+    if (!ok) return;
+
+    setIsMutatingId(id);
+    try {
+      await deleteAticlesService(id);
+      setArticles((prev) => prev.filter((a) => a.id !== id));
+      enqueueSnackbar("مقاله حذف شد", { variant: "success" });
+    } catch {
+      enqueueSnackbar("خطا در حذف مقاله", { variant: "error" });
+    } finally {
+      setIsMutatingId(null);
+    }
+  };
 
   return (
     <div className="grid gap-4">
@@ -43,7 +120,9 @@ export default function ArticlesList() {
         </Link>
       </div>
 
-      {rows.length === 0 ? (
+      {isLoading ? (
+        <div className="rounded-2xl border border-black/5 bg-white/60 p-6 text-sm text-foreground/70">در حال دریافت مقالات...</div>
+      ) : rows.length === 0 ? (
         <EmptyState />
       ) : (
         <div className="overflow-hidden rounded-2xl border border-black/5 bg-white/60">
@@ -88,42 +167,33 @@ export default function ArticlesList() {
                   <Link to={`/articles/${row.id}/edit`} className="inline-flex items-center justify-center rounded-xl border border-black/10 bg-white px-3 py-2 text-xs hover:bg-black/5">
                     ویرایش
                   </Link>
-	                  {row.status === "draft" ? (
-	                    <button
-	                      type="button"
-	                      disabled={!row.canPublish}
-	                      onClick={() => {
-	                        if (!row.canPublish) return;
-	                        const updated = updateArticle(row.id, { status: "published" });
-	                        if (!updated) return;
-	                        setArticles((prev) => prev.map((a) => (a.id === row.id ? updated : a)));
-	                      }}
-	                      className="inline-flex cursor-pointer items-center justify-center rounded-xl border border-green-200 bg-green-50 px-3 py-2 text-xs text-green-800 hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-50"
-	                    >
-	                      انتشار
-	                    </button>
-	                  ) : (
-	                    <button
-	                      type="button"
-	                      onClick={() => {
-	                        const updated = updateArticle(row.id, { status: "draft" });
-	                        if (!updated) return;
-	                        setArticles((prev) => prev.map((a) => (a.id === row.id ? updated : a)));
-	                      }}
-	                      className="inline-flex cursor-pointer items-center justify-center rounded-xl border border-black/10 bg-white px-3 py-2 text-xs hover:bg-black/5"
-	                    >
-	                      عدم انتشار
-	                    </button>
-	                  )}
-	                  <button
-	                    type="button"
-	                    onClick={() => {
-	                      const ok = window.confirm("این مقاله حذف شود؟");
-	                      if (!ok) return;
-                      deleteArticle(row.id);
-                      setArticles((prev) => prev.filter((a) => a.id !== row.id));
-                    }}
-                    className="inline-flex cursor-pointer items-center justify-center rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 hover:bg-red-100"
+                  {row.status === "draft" ? (
+                    <button
+                      type="button"
+                      disabled={!row.canPublish || isMutatingId === row.id}
+                      onClick={() => {
+                        if (!row.canPublish) return;
+                        void onChangeStatus(row.id, "published");
+                      }}
+                      className="inline-flex cursor-pointer items-center justify-center rounded-xl border border-green-200 bg-green-50 px-3 py-2 text-xs text-green-800 hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      انتشار
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={isMutatingId === row.id}
+                      onClick={() => void onChangeStatus(row.id, "draft")}
+                      className="inline-flex cursor-pointer items-center justify-center rounded-xl border border-black/10 bg-white px-3 py-2 text-xs hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      عدم انتشار
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    disabled={isMutatingId === row.id}
+                    onClick={() => void onDelete(row.id)}
+                    className="inline-flex cursor-pointer items-center justify-center rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     حذف
                   </button>
@@ -133,6 +203,26 @@ export default function ArticlesList() {
           </ul>
         </div>
       )}
+
+      <div className="flex items-center justify-between gap-2">
+        <button
+          type="button"
+          disabled={page <= 1 || isLoading}
+          onClick={() => setPage((p) => Math.max(1, p - 1))}
+          className="inline-flex items-center justify-center rounded-xl border border-black/10 bg-white px-3 py-2 text-xs hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          صفحه قبل
+        </button>
+        <div className="text-xs text-foreground/70">صفحه {page}</div>
+        <button
+          type="button"
+          disabled={isLoading || rows.length < limit}
+          onClick={() => setPage((p) => p + 1)}
+          className="inline-flex items-center justify-center rounded-xl border border-black/10 bg-white px-3 py-2 text-xs hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          صفحه بعد
+        </button>
+      </div>
     </div>
   );
 }

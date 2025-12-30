@@ -8,7 +8,7 @@ export type Article = {
   summary: string;
   image: string | null;
   status: ArticleStatus;
-  tags: string[];
+  tagIds: string[];
   value: Descendant[];
   html: string;
   createdAt: string;

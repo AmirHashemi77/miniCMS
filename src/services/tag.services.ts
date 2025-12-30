@@ -7,16 +7,16 @@ export const getTagsListService = async (page: number, limit: number) => {
 };
 
 export const createTagService = async (data: { name: string }) => {
-  const response = await API.post<unknown>(`/admin/tags`, data);
+  const response = await API.post<Tag>(`/admin/tags`, data);
   return response;
 };
 
 export const editTagService = async (id: string, data: { name: string }) => {
-  const response = await API.put<unknown>(`/admin/tags/${id}`, data);
+  const response = await API.put<Tag>(`/admin/tags/${id}`, data);
   return response;
 };
 
 export const deleteTagService = async (id: string) => {
-  const response = await API.delete<unknown>(`/admin/tags/${id}`);
+  const response = await API.delete<void>(`/admin/tags/${id}`);
   return response;
 };

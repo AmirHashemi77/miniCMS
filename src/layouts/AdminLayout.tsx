@@ -1,6 +1,9 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { logOut } from "../lib/auth";
 
 function AdminLayout() {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-dvh bg-background text-foreground font-vazir" dir="rtl" lang="fa">
       <header className="sticky top-0 z-10 border-b border-black/5 bg-background/80 backdrop-blur">
@@ -23,6 +26,16 @@ function AdminLayout() {
             <NavLink to="/articles/new" className={({ isActive }) => ["rounded-xl px-3 py-2 transition", isActive ? "bg-secondary text-secondary-foreground" : "hover:bg-black/5"].join(" ")}>
               ایجاد مقاله
             </NavLink>
+            <button
+              type="button"
+              onClick={() => {
+                logOut();
+                navigate("/login", { replace: true });
+              }}
+              className="rounded-xl px-3 py-2 transition hover:bg-black/5"
+            >
+              خروج
+            </button>
           </nav>
         </div>
       </header>
