@@ -110,11 +110,10 @@ export default function TagsList() {
           </div>
           <ul className="divide-y divide-black/5">
             {tags.map((t) => {
-              const count = usageById.get(t.id) ?? 0;
               return (
                 <li key={t.id} className="grid grid-cols-12 items-center gap-3 px-4 py-3">
                   <div className="col-span-8 truncate text-sm font-medium">{t.name}</div>
-                  <div className="col-span-2 text-xs text-foreground/70">{count}</div>
+                  <div className="col-span-2 text-xs text-foreground/70">{t.usageCount}</div>
                   <div className="col-span-2 flex justify-start">
                     <button
                       type="button"

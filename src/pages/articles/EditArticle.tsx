@@ -160,6 +160,7 @@ export default function EditArticle() {
                 return { ...prev, title, summary, image, status, tagIds, value, html, updatedAt: new Date().toISOString() };
               });
               enqueueSnackbar("تغییرات ذخیره شد", { variant: "success" });
+              navigate("/articles", { replace: true });
             } catch {
               enqueueSnackbar("خطا در ذخیره مقاله", { variant: "error" });
             } finally {

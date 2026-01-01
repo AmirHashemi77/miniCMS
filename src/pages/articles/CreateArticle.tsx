@@ -36,11 +36,8 @@ export default function CreateArticle() {
 
               enqueueSnackbar("مقاله ایجاد شد", { variant: "success" });
 
-              if (created?.id) {
-                navigate(`/articles/${created.id}/edit`, { replace: true });
-              } else {
-                navigate("/articles", { replace: true });
-              }
+              void created;
+              navigate("/articles", { replace: true });
             } catch {
               enqueueSnackbar("خطا در ایجاد مقاله", { variant: "error" });
             } finally {
