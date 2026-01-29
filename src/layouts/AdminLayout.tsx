@@ -10,7 +10,7 @@ function AdminLayout() {
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
           <div className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-xl bg-primary" aria-hidden="true" />
-            <div className="leading-tight">
+            <div className="!leading-tight">
               <div className="text-sm font-semibold">پنل مدیریت</div>
               <div className="text-xs text-foreground/70">Mini CMS</div>
             </div>

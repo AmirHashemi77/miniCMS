@@ -49,20 +49,20 @@ function Element(props: RenderElementProps) {
         <a
           {...attributes}
           href={sanitizeUrl(element.url)}
-          className="text-slate-900 underline decoration-slate-300 underline-offset-4 hover:text-slate-950 hover:decoration-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+          className="text-slate-700 underline decoration-slate-300 underline-offset-4 hover:text-slate-950 hover:decoration-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
         >
           {children}
         </a>
       );
     case "heading-two":
       return (
-        <h2 {...attributes} className={["mt-10 scroll-mt-24 text-2xl font-semibold leading-tight tracking-tight text-slate-900 sm:text-3xl", alignClass].join(" ")}>
+        <h2 {...attributes} className={["mt-10 scroll-mt-24 text-2xl font-semibold !leading-tight tracking-tight text-slate-700 sm:text-3xl", alignClass].join(" ")}>
           {children}
         </h2>
       );
     case "heading-three":
       return (
-        <h3 {...attributes} className={["mt-8 scroll-mt-24 text-xl font-semibold leading-snug tracking-tight text-slate-900 sm:text-2xl", alignClass].join(" ")}>
+        <h3 {...attributes} className={["mt-8 scroll-mt-24 text-xl font-semibold !leading-snug tracking-tight text-slate-700 sm:text-2xl", alignClass].join(" ")}>
           {children}
         </h3>
       );
@@ -70,38 +70,38 @@ function Element(props: RenderElementProps) {
       return (
         <blockquote
           {...attributes}
-          className={["my-6 rounded-xl border-r-4 border-slate-300 bg-slate-50 px-4 py-3 text-[0.95rem] italic leading-7 text-slate-700 sm:text-[1.05rem] sm:leading-8", alignClass].join(" ")}
+          className={["my-6 rounded-xl border-r-4 border-slate-300 bg-slate-50 px-4 py-3 text-[0.80rem] italic !leading-7 text-slate-700 sm:text-[.9rem] sm:!leading-9", alignClass].join(" ")}
         >
           {children}
         </blockquote>
       );
     case "bulleted-list":
       return (
-        <ul {...attributes} className="my-6 list-disc space-y-2 pr-6 text-[0.95rem] leading-7 text-slate-900 marker:text-slate-400 sm:text-[1.05rem] sm:leading-8">
+        <ul {...attributes} className="my-6 list-disc space-y-2 pr-6 text-[0.80rem] !leading-7 text-slate-700 marker:text-slate-400 sm:text-[.9rem] sm:!leading-9">
           {children}
         </ul>
       );
     case "numbered-list":
       return (
-        <ol {...attributes} className="my-6 list-decimal space-y-2 pr-6 text-[0.95rem] leading-7 text-slate-900 marker:text-slate-400 sm:text-[1.05rem] sm:leading-8">
+        <ol {...attributes} className="my-6 list-decimal space-y-2 pr-6 text-[0.80rem] !leading-7 text-slate-700 marker:text-slate-400 sm:text-[.9rem] sm:!leading-10">
           {children}
         </ol>
       );
     case "list-item":
       return (
-        <li {...attributes} className="leading-7 sm:leading-8">
+        <li {...attributes} className="!leading-7 sm:!leading-10">
           {children}
         </li>
       );
     case "code-block":
       return (
-        <pre {...attributes} className="my-6 overflow-x-auto rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 font-mono text-sm leading-6 text-slate-900 sm:text-[0.95rem]">
+        <pre {...attributes} className="my-6 overflow-x-auto rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 font-mono text-sm !leading-6 text-slate-700 sm:text-[0.80rem]">
           <code>{children}</code>
         </pre>
       );
     default:
       return (
-        <p {...attributes} className={["my-4 text-[0.95rem] leading-7 text-slate-900 sm:text-[1.05rem] sm:leading-8", alignClass].join(" ")}>
+        <p {...attributes} className={["my-4 text-[0.80rem] !leading-7 text-slate-700 sm:text-[.9rem] sm:!leading-9", alignClass].join(" ")}>
           {children}
         </p>
       );
@@ -115,7 +115,7 @@ function Leaf(props: RenderLeafProps) {
   if (leaf.bold) next = <strong>{next}</strong>;
   if (leaf.italic) next = <em>{next}</em>;
   if (leaf.underline) next = <u>{next}</u>;
-  if (leaf.code) next = <code className="rounded-md bg-slate-100 px-1.5 py-0.5 font-mono text-[0.95em] text-slate-900 ring-1 ring-inset ring-slate-200">{next}</code>;
+  if (leaf.code) next = <code className="rounded-md bg-slate-100 px-1.5 py-0.5 font-mono text-[0.95em] text-slate-700 ring-1 ring-inset ring-slate-200">{next}</code>;
 
   return (
     <span {...attributes} className="text-inherit">

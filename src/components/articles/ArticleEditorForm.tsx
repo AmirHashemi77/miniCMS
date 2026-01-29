@@ -52,7 +52,7 @@ export default function ArticleEditorForm(props: Props) {
             <textarea
               value={summary}
               onChange={(e) => setSummary(e.target.value)}
-              className="mt-2 w-full resize-none rounded-xl border border-black/10 bg-white px-3 py-2 text-sm leading-6 outline-none ring-primary/30 focus:ring-4"
+              className="mt-2 w-full resize-none rounded-xl border border-black/10 bg-white px-3 py-2 text-sm !leading-6 outline-none ring-primary/30 focus:ring-4"
               rows={3}
               placeholder="خلاصه کوتاه برای نمایش در لیست…"
             />
