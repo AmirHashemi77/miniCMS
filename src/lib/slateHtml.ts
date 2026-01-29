@@ -11,6 +11,7 @@ function sanitizeUrl(raw: string) {
   const lower = url.toLowerCase();
   if (!url) return "#";
   if (lower.startsWith("http://") || lower.startsWith("https://")) return url;
+  if (lower.startsWith("data:") || lower.startsWith("blob:")) return url;
   if (lower.startsWith("mailto:") || lower.startsWith("tel:")) return url;
   return "#";
 }
@@ -70,6 +71,17 @@ function serializeNode(node: Descendant): string {
       return `<pre${classAttr("my-6 overflow-x-auto rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 font-mono text-sm !leading-6 text-slate-700 sm:text-[0.8rem]")}><code>${escapeHtml(
         node.children.map((n) => (Text.isText(n) ? n.text : "")).join("\n"),
       )}</code></pre>`;
+    case "image": {
+      const imageNode = node as { url?: string; alt?: string; width?: number; align?: Align };
+      const url = escapeHtml(sanitizeUrl(imageNode.url ?? ""));
+      const alt = escapeHtml(imageNode.alt ?? "");
+      const width = imageNode.width ? Math.max(10, Math.min(imageNode.width, 100)) : undefined;
+      const alignClass = imageNode.align === "center" ? "justify-center" : imageNode.align === "left" ? "justify-start" : "justify-end";
+      const widthStyle = width ? ` style="width:${width}%;"` : "";
+      const caption = alt ? `<figcaption${classAttr("mt-2 text-center text-xs text-slate-500")}>${alt}</figcaption>` : "";
+
+      return `<figure${classAttr("my-6 flex", alignClass)}><div${classAttr("rounded-2xl border border-slate-200 bg-white p-2 shadow-sm")}${widthStyle}><img src="${url}" alt="${alt}"${classAttr("h-auto w-full rounded-xl object-cover")} />${caption}</div></figure>`;
+    }
     default:
       return `<p${classAttr("my-4 text-[0.8rem] !leading-9 text-slate-700 ", alignClass)}>${children}</p>`;
   }

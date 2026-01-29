@@ -1,5 +1,6 @@
 import { Editor, Element as SlateElement, Range, Transforms } from "slate";
 import { ReactEditor, useSlate } from "slate-react";
+import { useRef } from "react";
 import type React from "react";
 import type { Align, CustomElement } from "../../slate";
 
@@ -118,6 +119,50 @@ function setAlign(editor: Editor, align: Align) {
   );
 }
 
+function isImageActive(editor: Editor) {
+  const [match] = Editor.nodes(editor, {
+    match: (n) => !Editor.isEditor(n) && SlateElement.isElement(n) && n.type === "image",
+  });
+  return !!match;
+}
+
+function getActiveImage(editor: Editor) {
+  const [match] = Editor.nodes(editor, {
+    match: (n) => !Editor.isEditor(n) && SlateElement.isElement(n) && n.type === "image",
+  });
+  if (!match) return null;
+  const [node, path] = match;
+  if (!SlateElement.isElement(node) || node.type !== "image") return null;
+  return { node, path };
+}
+
+function parseWidth(raw: string | null) {
+  if (!raw) return undefined;
+  const value = Number(raw);
+  if (!Number.isFinite(value)) return undefined;
+  const clamped = Math.max(10, Math.min(100, value));
+  return clamped;
+}
+
+function insertImage(editor: Editor, url: string, options?: { alt?: string; width?: number; align?: Align }) {
+  const image = {
+    type: "image",
+    url,
+    alt: options?.alt,
+    width: options?.width,
+    align: options?.align,
+    children: [{ text: "" }],
+  } satisfies CustomElement;
+  Transforms.insertNodes(editor, image);
+  Transforms.insertNodes(editor, { type: "paragraph", children: [{ text: "" }] } satisfies CustomElement);
+}
+
+function updateImage(editor: Editor, next: { url?: string; alt?: string; width?: number; align?: Align }) {
+  const current = getActiveImage(editor);
+  if (!current) return;
+  Transforms.setNodes(editor, next, { at: current.path });
+}
+
 function toggleBlock(editor: Editor, blockType: string) {
   const isActive = isBlockActive(editor, blockType);
   const isList = isListType(blockType);
@@ -149,6 +194,7 @@ function toggleBlock(editor: Editor, blockType: string) {
 
 function ToolbarButton(props: {
   active?: boolean;
+  disabled?: boolean;
   onMouseDown: (event: React.MouseEvent<HTMLButtonElement>) => void;
   children: React.ReactNode;
 }) {
@@ -156,10 +202,12 @@ function ToolbarButton(props: {
     <button
       type="button"
       onMouseDown={props.onMouseDown}
+      disabled={props.disabled}
       className={[
         "inline-flex h-9 cursor-pointer items-center justify-center rounded-xl px-3 text-sm transition",
         props.active ? "bg-primary text-primary-foreground" : "bg-white/70 hover:bg-white",
         "border border-black/5",
+        props.disabled ? "cursor-not-allowed opacity-50 hover:bg-white/70" : "",
       ].join(" ")}
     >
       {props.children}
@@ -171,6 +219,8 @@ export default function EditorToolbar() {
   const editor = useSlate();
   const activeAlign = getActiveAlign(editor);
   const linkActive = isLinkActive(editor);
+  const imageActive = isImageActive(editor);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -236,6 +286,70 @@ export default function EditorToolbar() {
         }}
       >
         حذف لینک
+      </ToolbarButton>
+
+      <ToolbarButton
+        active={false}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          ReactEditor.focus(editor);
+          const url = window.prompt("آدرس تصویر را وارد کنید:", "https://");
+          if (!url || !url.trim()) return;
+          const alt = window.prompt("متن جایگزین (اختیاری):", "");
+          const width = parseWidth(window.prompt("عرض تصویر (درصد ۱۰ تا ۱۰۰):", "100"));
+          const align = window.prompt("تراز تصویر: right / center / left", "center");
+          const nextAlign = align === "left" || align === "center" || align === "right" ? align : "center";
+          insertImage(editor, url.trim(), { alt: alt?.trim() || undefined, width, align: nextAlign });
+        }}
+      >
+        عکس (لینک)
+      </ToolbarButton>
+      <ToolbarButton
+        active={false}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          fileInputRef.current?.click();
+        }}
+      >
+        آپلود عکس
+      </ToolbarButton>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = () => {
+            const result = typeof reader.result === "string" ? reader.result : "";
+            if (!result) return;
+            ReactEditor.focus(editor);
+            insertImage(editor, result, { align: "center", width: 100 });
+          };
+          reader.readAsDataURL(file);
+          e.currentTarget.value = "";
+        }}
+      />
+      <ToolbarButton
+        active={imageActive}
+        disabled={!imageActive}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          if (!imageActive) return;
+          ReactEditor.focus(editor);
+          const current = getActiveImage(editor);
+          if (!current) return;
+          const node = current.node as { url?: string; alt?: string; width?: number; align?: Align };
+          const alt = window.prompt("متن جایگزین (اختیاری):", node.alt ?? "");
+          const width = parseWidth(window.prompt("عرض تصویر (درصد ۱۰ تا ۱۰۰):", String(node.width ?? 100)));
+          const align = window.prompt("تراز تصویر: right / center / left", node.align ?? "center");
+          const nextAlign = align === "left" || align === "center" || align === "right" ? align : "center";
+          updateImage(editor, { alt: alt?.trim() || undefined, width, align: nextAlign });
+        }}
+      >
+        تنظیمات عکس
       </ToolbarButton>
 
       <div className="mx-1 h-6 w-px bg-black/10" aria-hidden="true" />

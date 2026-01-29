@@ -25,6 +25,7 @@ function sanitizeUrl(raw: string) {
   const lower = url.toLowerCase();
   if (!url) return "#";
   if (lower.startsWith("http://") || lower.startsWith("https://")) return url;
+  if (lower.startsWith("data:") || lower.startsWith("blob:")) return url;
   if (lower.startsWith("mailto:") || lower.startsWith("tel:")) return url;
   return "#";
 }
@@ -33,6 +34,14 @@ function withLinks(editor: Editor) {
   const { isInline } = editor;
   editor.isInline = (element) => {
     return (SlateElement.isElement(element) && element.type === "link") || isInline(element);
+  };
+  return editor;
+}
+
+function withImages(editor: Editor) {
+  const { isVoid } = editor;
+  editor.isVoid = (element) => {
+    return (SlateElement.isElement(element) && element.type === "image") || isVoid(element);
   };
   return editor;
 }
@@ -99,6 +108,26 @@ function Element(props: RenderElementProps) {
           <code>{children}</code>
         </pre>
       );
+    case "image": {
+      const url = "url" in element ? (element.url as string) : "";
+      const alt = "alt" in element ? (element.alt as string | undefined) : undefined;
+      const width = "width" in element ? (element.width as number | undefined) : undefined;
+      const imageAlign: Align | undefined = "align" in element ? (element.align as Align | undefined) : undefined;
+      const justifyClass = imageAlign === "center" ? "justify-center" : imageAlign === "left" ? "justify-start" : "justify-end";
+      const widthStyle = width ? ({ width: `${Math.max(10, Math.min(width, 100))}%` } as const) : undefined;
+
+      return (
+        <div {...attributes} className="my-4">
+          <div contentEditable={false} className={["flex", justifyClass].join(" ")}>
+            <div className="rounded-2xl border border-slate-200 bg-white p-2 shadow-sm" style={widthStyle}>
+              <img src={sanitizeUrl(url)} alt={alt ?? ""} className="h-auto w-full rounded-xl object-cover" />
+              {alt ? <p className="mt-2 text-center text-xs text-slate-500">{alt}</p> : null}
+            </div>
+          </div>
+          {children}
+        </div>
+      );
+    }
     default:
       return (
         <p {...attributes} className={["my-4 text-[0.80rem] !leading-7 text-slate-700 sm:text-[.9rem] sm:!leading-9", alignClass].join(" ")}>
@@ -125,7 +154,7 @@ function Leaf(props: RenderLeafProps) {
 }
 
 export default function RichTextEditor(props: Props) {
-  const editor = useMemo(() => withLinks(withHistory(withReact(createEditor()))), []);
+  const editor = useMemo(() => withImages(withLinks(withHistory(withReact(createEditor())))), []);
 
   const renderElement = useCallback((p: RenderElementProps) => <Element {...p} />, []);
   const renderLeaf = useCallback((p: RenderLeafProps) => <Leaf {...p} />, []);

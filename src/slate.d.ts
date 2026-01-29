@@ -7,6 +7,14 @@ export type NumberedListElement = { type: "numbered-list"; children: ListItemEle
 export type ListItemElement = { type: "list-item"; children: CustomText[] };
 export type CodeBlockElement = { type: "code-block"; children: CustomText[] };
 export type LinkElement = { type: "link"; url: string; children: CustomText[] };
+export type ImageElement = {
+  type: "image";
+  url: string;
+  alt?: string;
+  width?: number;
+  align?: Align;
+  children: CustomText[];
+};
 
 export type Align = "left" | "center" | "right";
 export type AlignableElement = {
@@ -27,7 +35,8 @@ export type CustomElement =
   | NumberedListElement
   | ListItemElement
   | CodeBlockElement
-  | LinkElement;
+  | LinkElement
+  | ImageElement;
 
 export type CustomText = {
   text: string;
